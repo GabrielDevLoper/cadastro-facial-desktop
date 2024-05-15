@@ -1,8 +1,9 @@
 
-import { useRef, useState } from "react";
+import {  useRef, useState } from "react";
 import useWebcam from "../hooks/useWebcam";
-import Head from "next/head";
 import Header from "../components/Header";
+import { useRouter } from "next/router";
+import { Image } from 'image-js';
 
 export default function HomePage() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -10,6 +11,13 @@ export default function HomePage() {
   const [capturedPhoto, setCapturedPhoto] = useState<string>();
   const [inputValue, setInputValue] = useState<string>("");
   useWebcam(videoRef);
+
+  const router = useRouter();
+
+  const handleReload = () => {
+    router.reload();
+  };
+
 
   function capturePhoto() {
     const videoElement = videoRef.current;
@@ -20,25 +28,50 @@ export default function HomePage() {
     const context = canvasElement.getContext('2d');
     if (!context) return;
 
-    canvasElement.width = videoElement.videoWidth;
-    canvasElement.height = videoElement.videoHeight;
+    // Defina a resolução desejada
+      const desiredWidth = 320; // Por exemplo, 640 pixels de largura
+      const scaleFactor = desiredWidth / videoElement.videoWidth;
+      const canvasWidth = desiredWidth;
+      const canvasHeight = videoElement.videoHeight * scaleFactor;
 
-    context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+    // Defina o tamanho do canvas com a resolução desejada
+    canvasElement.width = canvasWidth;
+    canvasElement.height = canvasHeight;
+
+    // canvasElement.width = videoElement.videoWidth;
+    // canvasElement.height = videoElement.videoHeight;
+
+    context.drawImage(videoElement, 0, 0, canvasWidth, canvasHeight);
 
     // Convertendo o canvas para base64
     const photoData = canvasElement.toDataURL('image/png');
     setCapturedPhoto(photoData);
   }
 
-  function downloadPhoto() {
+  async function downloadPhoto() {
     if (!capturedPhoto) return;
+
+
+  //   // Carrega a imagem
+  // const image = await Image.load(capturedPhoto);
+
+  // // Compacta a imagem para ter no máximo 150KB
+  // const compressedImage = await image.compress({
+  //   maxSizeMB: 0.15, // 150KB
+  //   useWebWorker: true,
+  // });
+
+  // // Converte a imagem comprimida para um Blob
+  // const blob = await compressedImage.toBlob();
 
     const link = document.createElement('a');
     link.href = capturedPhoto;
-    link.download = `${inputValue}.png`;
+    link.download = `${inputValue}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    handleReload();
   }
 
 
@@ -76,12 +109,14 @@ export default function HomePage() {
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  className="border border-gray-300 rounded px-2 py-1 mr-2 text-black"
+                  className="border border-gray-300 rounded px-2 py-1 mr-2"
+                  style={{ color: 'black'}}
                   placeholder="Nome da foto"
                 />
                 <button
                   onClick={downloadPhoto}
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  className="hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  style={{ background: 'green'}}
                 >
                   Baixar Foto
                 </button>
