@@ -18,6 +18,11 @@ export default function HomePage() {
     router.reload();
   };
 
+  function tirarFotoNovamente(){
+    setCapturedPhoto(null);
+    handleReload();
+  }
+
 
   function capturePhoto() {
     const videoElement = videoRef.current;
@@ -29,7 +34,7 @@ export default function HomePage() {
     if (!context) return;
 
     // Defina a resolução desejada
-      const desiredWidth = 320; // Por exemplo, 640 pixels de largura
+      const desiredWidth = 250; // Por exemplo, 640 pixels de largura
       const scaleFactor = desiredWidth / videoElement.videoWidth;
       const canvasWidth = desiredWidth;
       const canvasHeight = videoElement.videoHeight * scaleFactor;
@@ -51,22 +56,10 @@ export default function HomePage() {
   async function downloadPhoto() {
     if (!capturedPhoto) return;
 
-
-  //   // Carrega a imagem
-  // const image = await Image.load(capturedPhoto);
-
-  // // Compacta a imagem para ter no máximo 150KB
-  // const compressedImage = await image.compress({
-  //   maxSizeMB: 0.15, // 150KB
-  //   useWebWorker: true,
-  // });
-
-  // // Converte a imagem comprimida para um Blob
-  // const blob = await compressedImage.toBlob();
-
     const link = document.createElement('a');
     link.href = capturedPhoto;
-    link.download = `${inputValue}.jpg`;
+    var nomeFoto = inputValue ? inputValue : Math.random()
+    link.download = `${nomeFoto}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -102,9 +95,9 @@ export default function HomePage() {
             <>
               <div>
                   <img src={capturedPhoto} alt="Captured" width={50} height={50}/>
+                
               </div>
               <div>
-            
                 <input
                   type="text"
                   value={inputValue}
@@ -115,11 +108,17 @@ export default function HomePage() {
                 />
                 <button
                   onClick={downloadPhoto}
-                  className="hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  className="hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
                   style={{ background: 'green'}}
                 >
                   Baixar Foto
                 </button>
+                <button
+                      onClick={tirarFotoNovamente}
+                      className="bg-red-50 text-white font-bold py-2 px-4 rounded"
+                      style={{ background: 'red'}}>
+                      Tirar outra foto
+                  </button>
               </div>
             </>
           ): (
